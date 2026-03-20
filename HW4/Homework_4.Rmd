@@ -1,0 +1,59 @@
+---
+title: "HW4"
+output: word_document
+date: "2026-02-17"
+---
+
+```{r}
+#Question 1
+ds1 = read.csv("activity_bp25.csv", header=TRUE)
+ds_new = ds1
+
+#a)	delta_sbp, defined as the change in systolic blood pressure between follow-up and baseline
+ds_new$delta_sbp = (ds_new$SBP_T2-ds_new$SBP_T1)
+
+#b)	Using ACTIVE_T1 and ACTIVE_T2, create a variable called activity_status with the following coding
+ds_new$activity_status = rep(0, nrow(ds_new))
+ds_new$activity_status[ds_new$ACTIVE_T1 == 0 & ds_new$ACTIVE_T2 == 0] = "00"
+ds_new$activity_status[ds_new$ACTIVE_T1 == 0 & ds_new$ACTIVE_T2 == 1] = "01"
+ds_new$activity_status[ds_new$ACTIVE_T1 == 1 & ds_new$ACTIVE_T2 == 0] = "10"
+ds_new$activity_status[ds_new$ACTIVE_T1 == 1 & ds_new$ACTIVE_T2 == 1] = "11"
+```
+
+```{r}
+table(ds_new$activity_status)
+round(prop.table(table(ds_new$activity_status)) * 100, 2)
+nrow(ds_new)
+
+round(tapply(ds_new$SBP_T1, ds_new$activity_status, mean, na.rm=TRUE),2) 
+round(tapply(ds_new$SBP_T1, ds_new$activity_status, sd, na.rm=TRUE),2)
+round(mean(ds_new$SBP_T1, na.rm=TRUE), 2)
+round(sd(ds_new$SBP_T1, na.rm=TRUE), 2)
+
+round(tapply(ds_new$SBP_T2, ds_new$activity_status, mean, na.rm=TRUE),2)
+round(tapply(ds_new$SBP_T2, ds_new$activity_status, sd, na.rm=TRUE),2)
+round(mean(ds_new$SBP_T2, na.rm=TRUE), 2)
+round(sd(ds_new$SBP_T2, na.rm=TRUE), 2)
+
+round(tapply(ds_new$delta_sbp, ds_new$activity_status, mean, na.rm=TRUE),2)
+round(tapply(ds_new$delta_sbp, ds_new$activity_status, sd, na.rm=TRUE),2)
+round(mean(ds_new$delta_sbp, na.rm=TRUE), 2)
+round(sd(ds_new$delta_sbp, na.rm=TRUE), 2)
+```
+
+```{r}
+hist(ds_new$SBP_T1, main = "Plot of Baseline SBP", xlab = "SBP (mmHg)", ylab = "Frequency of SBP")
+```
+
+```{r}
+t.test(ds_new$SBP_T1, mu=120)
+```
+```{r}
+(123.69-120)/(12.42/sqrt(240))
+```
+
+```{r}
+newdat <- subset(ds_new, activity_status == "01")
+
+t.test(newdat$SBP_T2, newdat$SBP_T1, paired = TRUE)
+```

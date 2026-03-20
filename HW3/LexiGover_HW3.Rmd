@@ -1,0 +1,101 @@
+---
+title: "LexiGover_HW3"
+output: word_document
+date: "2026-02-09"
+---
+
+a) Read the two text files into R and assign them to two objects called baseline and followup respectively. Present the variable names and dimensions of each dataset. (2 points)
+```{r}
+baseline = read.table("baseline_vision.txt", header=TRUE, sep=" ")
+followup = read.table("followup_vision.txt", header=TRUE, sep=" ")
+
+names(baseline)
+names(followup)
+
+dim(baseline)
+dim(followup)
+```
+
+
+b) Merge the two data frames into a single data frame called vision_data by the patient’s id and eye. After merging, remove any rows with missing values using vision_data = na.omit(vision_data). What are the variable names and dimensions of vision_data? (2 points)
+```{r}
+vision_data = merge(baseline, followup, by= c("id", "eye"))
+
+vision_data = na.omit(vision_data)
+
+names(vision_data)
+dim(vision_data)
+```
+Variable names: id, eye, laser, trt, age, risk, vision_baseline, vision_6mo
+
+The dimensions are 389 rows (observations) x 8 columns (variables).
+
+
+c) Rename the variable trt to treatment and risk to risk_score in the vision_data dataset. Present the updated variable names. (2 points)
+```{r}
+library(reshape)
+
+vision_data = rename(vision_data, c("trt" = "treatment", "risk" = "risk_score"))
+names(vision_data)
+head(vision_data)
+```
+
+
+d) Drop the variables laser and risk_score from the vision_data dataset. Present the updated variable names. (2 points)
+```{r}
+vision_data = subset(vision_data, select = -c(laser, risk_score))
+
+names(vision_data)
+head(vision_data)
+```
+
+
+e) Create a new factor variable eye.f in the vision_data dataset with labels “Left Eye” and “Right Eye”. Present a frequency table for eye.f. (2 points)
+```{r}
+vision_data$eye.f = factor(vision_data$eye, levels = c("left", "right"), labels = c("Left Eye", "Right Eye"))
+
+table(vision_data$eye.f)
+```
+
+f) Calculate the change in vision score for each observation by subtracting the baseline vision score from the 6-month vision score. Call this new variable vision_change and save it in the vision_data dataset. A negative value indicates vision deterioration. What are the mean and standard deviation of vision_change? Round to 2 decimal places. (2 points)
+```{r}
+vision_data$vision_change = (vision_data$vision_6mo - vision_data$vision_baseline)
+
+round(mean(vision_data$vision_change),2)
+round(sd(vision_data$vision_change),2)
+```
+
+The mean is -3.07 and the standard deviation is 1.03.
+
+
+g) Create a new variable age_group and save it in the vision_data dataset. This variable should categorize patients into three groups: (3 points)
+```{r}
+vision_data$age_group = rep(0, length(vision_data$age)) 
+vision_data$age_group[vision_data$age < 20] = "Young"
+vision_data$age_group[vision_data$age >= 20 & vision_data$age <= 40] = "Middle"
+vision_data$age_group[vision_data$age >40] = "Senior"
+
+vision_data$age_group = factor(vision_data$age_group)
+
+table(vision_data$age_group)
+```
+
+
+h) Subset the vision_data dataset to include only observations where vision_change is negative (i.e., vision deteriorated). Call this subset deteriorated. What are the dimensions of deteriorated? What percentage of the total observations had vision deterioration? (2 points)
+```{r}
+deteriorated = subset(vision_data, vision_change < 0)
+
+dim(deteriorated)
+
+percent_deteriorate = nrow(deteriorated) / nrow(vision_data) *100
+
+percent_deteriorate
+```
+The dimensions are 387 rows (observations) x 9 columns (variables). 99.49% of the total observations has vision deteriorated.
+
+
+i) Using the deteriorated dataset from part (h), create a cross-tabulation of age_group and treatment. Among patients who experienced vision deterioration, which age group had the highest number of treated eyes? (3 points)
+```{r}
+table(deteriorated$age_group, deteriorated$treatment)
+```
+The young had the highest number of treated eyes among the patients who experienced vision deterioration.
