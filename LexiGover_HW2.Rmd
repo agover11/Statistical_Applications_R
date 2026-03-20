@@ -1,0 +1,85 @@
+---
+title: "LexiGover_HW2"
+output: word_document
+date: "2026-02-02"
+---
+1. Read this tab-separated text file sleephealth.txt into R and call it "sleep". Present the variable names and the dataset's dimensions. (2 points)
+```{r}
+sleep = read.table("sleephealth.txt", header= TRUE, sep = "\t")
+names(sleep)
+dim(sleep)
+```
+
+
+2. Use the apply() function to estimate the means of age and heart rate, rounded to 3 decimal places (3 d.p.) in a single R statement. (2 points)
+```{r}
+round(apply(sleep[,c("Age", "Heart_Rate")], 2, mean), 3)
+```
+
+
+3. Use the lapply() function to estimate the means of age and heart rate in a single R statement (not required to round to 3 d.p.)  (1 point)
+```{r}
+lapply(sleep[, c("Age", "Heart_Rate")], mean)
+```
+4. Use the sapply() function to estimate the means of age and heart rate, rounded to 3 d.p., in a single R statement. What are the differences in the output for your results among parts (2), (3), and (4), other than the rounding? (2 points)
+```{r}
+round(sapply(sleep[, c("Age", "Heart_Rate")], mean), 3)
+```
+The difference is format it is displayed in. Sapply and apply display in vector format while lapply displays in list format. 
+
+
+5. Use the tapply() function to estimate the mean of heart rate by Sleep_disorder group. In your R code, ensure the output is rounded to 2 d.p. (1.5 points)
+```{r}
+round(tapply(sleep$Heart_Rate, sleep$Sleep_disorder, FUN = mean), 2)
+```
+
+
+6. Create a new indicator factor variable, duration_cat.f, in the sleep data set that indicates whether each participant has a healthy sleep duration. (duration_cat.f = 0 when Sleep_duration < 7 hours; otherwise duration_cat.f = 1). Label the factor levels as follows: "short sleep duration" for individuals with a sleep duration of less than 7 hours and "normal/healthy sleep duration " for those with a sleep duration of 7 hours or more, using the labels option. Present a frequency table of duration_cat.f. (2.5 points)
+```{r}
+
+sleep$duration_cat.f = ifelse (sleep$Sleep_Duration < 7,0,1)
+
+sleep$duration_cat.f = factor(sleep$duration_cat.f, levels = c(0,1), labels = c("short sleep duration", "normal/healthy sleep duration"))
+table(sleep$duration_cat.f)
+```
+
+
+7. Create a new categorical factor variable, duration_4cat, in the sleep dataset that categorizes the sleep duration into four categories with the following labels: "<6", "[6,7)", "[7,8)", ">=8". The intervals should be left-closed and right-open, meaning that, for example, the "[6,7]" category includes values ≥6 and <7. Create a frequency table of the duration_4cat variable. (2.5 points)
+```{r}
+sleep$duration_4cat = ifelse(sleep$Sleep_Duration < 6,0, 
+                        ifelse(sleep$Sleep_Duration<7,1,
+                       ifelse(sleep$Sleep_Duration<8,2,3)))
+
+sleep$duration_4cat <- factor(sleep$duration_4cat,
+                              levels = c(0,1,2,3),
+                              labels = c("<6", "[6,7)", "[7,8)", ">=8"))
+
+table(sleep$duration_4cat)
+```
+
+
+8. Create a new data frame called SleepDurationdata with only two variables: Sleep_Duration in the first column and duration_4cat in the second column. Use the head() function to show the first six rows of the new data frame. What are the dimensions of Sleep_Durationdata (no. of rows by the no. of columns)? Create a frequency table of duration_4cat with Sleep_Durationdata. (2.5 points)
+```{r}
+SleepDurationdata = sleep[,c("Sleep_Duration", "duration_4cat")]
+head(SleepDurationdata)
+dim(SleepDurationdata)
+
+table(SleepDurationdata$duration_4cat)
+```
+
+9. Export your the SleepDurationdata data frame and save it as a csv file called "mydata.csv". (1 point)
+```{r}
+write.table(SleepDurationdata, "mydata.csv")
+```
+
+
+10. Cross-tabulate the variables BMIcat and gender in the sleep dataset. Also, present a table of proportions of BMIcat for each level of gender. From these tables, how many males are there with a normal BMI? Among the males in the sample, what percentage have a normal BMI? (3 points)
+```{r}
+table(sleep$BMIcat, sleep$Gender)
+prop.table(table(sleep$BMIcat, sleep$Gender), 2) *100
+```
+There are 138 males with a normal BMI. 73.02% of males have a normal BMI. 
+
+
+
+
