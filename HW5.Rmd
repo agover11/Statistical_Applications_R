@@ -1,0 +1,72 @@
+---
+title: "LexiGover_HW5"
+output: word_document
+date: "2026-02-25"
+---
+0-11mo should be infants
+12-59 young children
+
+```{r}
+two sample t test 
+
+null: m1 = m2 infant and young have same first resp
+Alternative: infant and young do not have same first resp
+
+```
+
+```{r}
+spear_data = read.csv("spear4.csv", header=TRUE)
+head(spear_data)
+
+spear_data$young = rep(0, length(spear_data$agemo))
+spear_data$young[spear_data$agemo <= 11] = 1
+spear_data$young[spear_data$agemo >= 12 & spear_data$agemo <= 59] = 2 
+
+
+round(tapply(spear_data$first_resprate, spear_data$young, mean),2)
+
+tapply(spear_data$first_resprate, spear_data$young, sd)
+table(spear_data$young)
+
+
+# Calculate means for each age group
+tapply(spear_data$first_resprate, spear_data$young, mean)
+
+# Calculate standard deviations for each age group
+tapply(spear_data$first_resprate, spear_data$young, sd)
+
+# Sample sizes
+table(spear_data$young)
+
+# Two-sample t-test assuming equal variance
+t.test(first_resprate ~ young, data = spear_data, var.equal = TRUE)
+```
+
+```{r}
+tapply resp age mean
+```
+
+```{r}
+mean_tap = tapply(spear_data$first_resprate, spear_data$young, mean)
+sd_tap = tapply(spear_data$first_resprate, spear_data$young, sd)
+
+x1_bar = mean_tap[1]
+x2_bar = mean_tap[2] 
+
+sd1 = sd_tap[1]
+sd2 = sd_tap[2]
+
+n_tab = table(spear_data$young)
+n1 = n_tab[1]
+n2 = n_tab[2]
+
+sp2 = ((n1-1)*sd1^2 + (n2-1)*sd2^2) / (n1+n2-2)
+sp2 
+
+SE = sqrt(sp2) * sqrt(1/n1 + 1/n2)
+SE
+```
+
+```{r}
+SE = sqrt(sp2)*sqrt(1/n1 + 1/n2)
+```
